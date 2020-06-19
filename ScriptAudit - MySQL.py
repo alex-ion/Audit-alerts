@@ -81,7 +81,7 @@ def citire_fisier():
 
 def main1(Brand):
     global Fisier, rawText
-    if Brand=="Avis":
+    if Brand=="brand1":
         cale="EPROLD\\XPSBX\\FTP\\SRAA02P\\CR"
     else:
         cale="EEROLD\\XPSBX\\FTP\\SRAA02P\\CR"
@@ -197,7 +197,7 @@ def generare_raport(i, cap_tabel1, cap_tabel2, S, E):
 
 class CONTRACTE():
     global Lista_obiecte, nume_fisier_procesat
-    cel_putin_1_procesare=False#daca se gaseste cel putin 1 contract in fisierul de Avis sau cel de Budget, se poate executa functia de trimitere mail si stergere a fisierului CSV
+    cel_putin_1_procesare=False#daca se gaseste cel putin 1 contract in fisierul de brand1 sau cel de brand2, se poate executa functia de trimitere mail si stergere a fisierului CSV
     def __init__(self,RA,motiv,brand,month):
         CONTRACTE.cel_putin_1_procesare=True
         self.RA=RA
@@ -347,7 +347,7 @@ def trimitere_email():
     part.add_header('Content-Disposition', "attachment; filename= %s" % nume_fisier_procesat)
     msg.attach(part)
           
-    server = smtplib.SMTP_SSL('core1.avis.ro', 465)
+    server = smtplib.SMTP_SSL('', 465)
     server.login("", "")
     text = msg.as_string()
     server.sendmail(fromaddr, toaddr.split(",") + toccaddr.split(","), text)
@@ -371,13 +371,13 @@ if DB_connected == True:
     for zi in daterange(date(2020, int('01'), int('01')), date(time.localtime().tm_year, time.localtime().tm_mon, time.localtime().tm_mday)):
         if str(zi) not in lista_zile_DB:
             zi_din_an=str(time.strptime(str(zi),"%Y-%m-%d").tm_yday).rjust(3,"0")
-            query = "INSERT INTO zile_rulate_audit VALUES (default, '{0}','{1}','false','{2}',default)".format(zi_din_an,str(zi),'AVIS')
+            query = "INSERT INTO zile_rulate_audit VALUES (default, '{0}','{1}','false','{2}',default)".format(zi_din_an,str(zi),'brand1')
             try:
                 cur.execute(query)
                 db.commit()
             except(Exception) as error:
                 print (error)
-            query = "INSERT INTO zile_rulate_audit VALUES (default, '{0}','{1}','false','{2}',default)".format(zi_din_an,str(zi),'BUDGET')
+            query = "INSERT INTO zile_rulate_audit VALUES (default, '{0}','{1}','false','{2}',default)".format(zi_din_an,str(zi),'brand2')
             try:
                 cur.execute(query)
                 db.commit()
@@ -385,11 +385,11 @@ if DB_connected == True:
                 print (error)                
 
 
-    for brand in ["Avis","Budget"]:
-        if brand=="Avis":
-            query = "SELECT * FROM zile_rulate_audit WHERE rulat='false' and brand='AVIS'"
+    for brand in ["brand1","brand2"]:
+        if brand=="brand1":
+            query = "SELECT * FROM zile_rulate_audit WHERE rulat='false' and brand='brand1'"
         else:
-            query = "SELECT * FROM zile_rulate_audit WHERE rulat='false' and brand='BUDGET'"
+            query = "SELECT * FROM zile_rulate_audit WHERE rulat='false' and brand='brand2'"
             
         try:
             cur.execute(query)
@@ -406,10 +406,10 @@ if DB_connected == True:
                 else:
                     data = month + ' ' + an_data_nerulata
                 nume_fisier_procesat = "Raport audit - " + brand + ' ' + data + ".csv"
-                if brand=="Avis":
-                    Fisier='\\\\Storage\\SFTP\\clona_server\\country ftp\\ro\\eprosrmc' + zi_din_an + '.zip'
+                if brand=="brand1":
+                    Fisier='country ftp\\ro\\eprosrmc' + zi_din_an + '.zip'
                 else:
-                    Fisier='\\\\Storage\\SFTP\\clona_server\\Budget\\EBRNTDC0X1\\RO\\bud_eprosrmc' + zi_din_an + '.zip'
+                    Fisier='EBRNTDC0X1\\RO\\bud_eprosrmc' + zi_din_an + '.zip'
    
                 if os.path.isfile(Fisier):
                     query = "UPDATE zile_rulate_audit SET rulat='true' WHERE zi_din_an='{0}' and brand='{1}'".format(zi_din_an,brand)
